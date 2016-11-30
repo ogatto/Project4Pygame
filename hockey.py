@@ -43,11 +43,16 @@ class Paddle(pygame.sprite.Sprite):
 		keys = pygame.key.get_pressed()
 		self.speed = 0
 
+		#create response to key press
 		if keys[pygame.K_LEFT]:
 			self.speed -= 5
 		if keys[pygame.K_RIGHT]:
 			self.speed += 5	
+		
+		#update position of the rectangle
 		self.rect.x += self.speed
+
+		#thresholds of movement (cant go past border)
 		if self.rect.right > width:
 			self.rect.right = width
 		if self.rect.left < 0:
@@ -72,12 +77,25 @@ class Puck(pygame.sprite.Sprite):
 
 	def update(self):
 		keys = pygame.key.get_pressed()
-		self.speed = 0
+		#self.speed = 0
 		
 		if keys[pygame.K_SPACE]:
-			self.speed = 4.0
-		#if self.rect.right > width:
-			#self.rect.right	
+			self.speed = 4
+			self.rect.left += self.speed
+			self.rect.top  += -self.speed
+
+		if self.rect.top < 0:
+			self.rect.top = 0
+			#self.speed = -4
+			#self.rect.top -= self.speed	
+
+		if self.rect.right > width:
+			self.rect.right = width
+			self.rect.right +
+		if self.rect.left < 0:
+			self.rect.left = 0	
+
+
 
 			#need a way to reverse position at an angle. Also make the ball move at random angle.
 
@@ -105,8 +123,8 @@ class Net(pygame.sprite.Sprite):
 
 
 all_sprites = pygame.sprite.Group()
-pucks = pygame.sprite.Group()
-nets = pygame.sprite.Group()
+#pucks = pygame.sprite.Group()
+#nets = pygame.sprite.Group()
 
 paddle = Paddle()
 puck = Puck()
