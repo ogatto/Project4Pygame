@@ -5,25 +5,31 @@ import random
 
 pygame.init()
 
-width = 513
+width = 500
 height = 700
 
 game_display = pygame.display.set_mode((width, height))
 ice_rink = pygame.image.load('ice.bmp')
 ice_rink = pygame.transform.scale(ice_rink, (width, height))
 
-#puck
-puck_diameter = 18
-puck_radius = int(puck_diameter / 2)
-max_puck_x = width - puck_diameter
-max_puck_y = height - puck_diameter
+#-----ADD BLOCK M-----$
+# width2 = 250
+# height2 = 350
+
+# m_display = pygame,display.set_mode((width2, height2))
+# block_m = pygame.image.load('BlockM.bmp')
+# block_m = pygame.transform.scale(block_m, (width2, height2))
+
+
 
 class Paddle(pygame.sprite.Sprite):
 	def __init__(self):
 		pygame.sprite.Sprite.__init__(self)
 
-		self.width = 80
-		self.height = 80
+		self.width = 50
+		self.height = 50
+
+		self.screen = pygame.display.set_caption('AIR HOCKEY') #will need to be moved
 
 		self.image = pygame.image.load('paddle.bmp')
 		self.image = pygame.transform.scale(self.image, (self.width, self.height))
@@ -32,8 +38,6 @@ class Paddle(pygame.sprite.Sprite):
 		self.rect.centerx = width/2
 		self.rect.bottom = height - 10
 
-		self.live = 5
-		self.score = 0	
 
 	def update(self):
 		keys = pygame.key.get_pressed()
@@ -49,10 +53,68 @@ class Paddle(pygame.sprite.Sprite):
 		if self.rect.left < 0:
 				self.rect.left = 0	
 
+	
 
-sprites_list = pygame.sprite.Group()			
+class Puck(pygame.sprite.Sprite):
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+
+		self.width = 30
+		self.height = 30
+
+		self.image = pygame.image.load('puck.bmp')
+		self.image = transform.scale(self.image, (self.width, self.height))
+
+		self.rect = self.image.get_rect()
+		self.rect.centerx = width/2
+		self.rect.bottom = height - 55
+		 
+
+	def update(self):
+		keys = pygame.key.get_pressed()
+		self.speed = 0
+		
+		if keys[pygame.K_SPACE]:
+			self.speed = 4.0
+		#if self.rect.right > width:
+			#self.rect.right	
+
+			#need a way to reverse position at an angle. Also make the ball move at random angle.
+
+	#Add code that makes the puck move when space bar is pressed
+	#will function like a brick breaker game
+
+class Net(pygame.sprite.Sprite):
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+
+		self.width = 80
+		self.height = 80
+
+		self.image = pygame.image.load('net.bmp')
+		self.image = transform.scale(self.image, (self.width, self.height)) 
+
+		self.rect = self.image.get_rect()
+		self.rect.centerx = width/2
+		self.rect.top = height - 675
+
+	#def update(self):	
+	#Add code that makes the net move back and forth and a constant rate
+	#if the puck collides with net, gain score of 1
+	#if the puck passes by the paddle, opponent gains a score of 1
+
+
+all_sprites = pygame.sprite.Group()
+pucks = pygame.sprite.Group()
+nets = pygame.sprite.Group()
+
 paddle = Paddle()
-sprites_list.add(paddle)
+puck = Puck()
+net = Net()
+
+all_sprites.add(paddle)
+all_sprites.add(puck)
+all_sprites.add(net)
 
 gameExit = False
 while not gameExit:
@@ -61,8 +123,10 @@ while not gameExit:
 			gameExit = True
 	
 	game_display.blit(ice_rink, (0,0))
-	sprites_list.update()
-	sprites_list.draw(game_display)
+	#m_display.blit(block_m, (0,0))
+
+	all_sprites.update()
+	all_sprites.draw(game_display)
 	
 	pygame.display.flip()
 pygame.quit()
