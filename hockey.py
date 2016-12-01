@@ -5,20 +5,13 @@ import random
 
 pygame.init()
 
-width = 500
-height = 700
+max_width = 500
+max_height = 700
 
-game_display = pygame.display.set_mode((width, height))
+game_display = pygame.display.set_mode((max_width, max_height))
 ice_rink = pygame.image.load('ice.bmp')
-ice_rink = pygame.transform.scale(ice_rink, (width, height))
-
-#-----ADD BLOCK M-----$
-# width2 = 250
-# height2 = 350
-
-# m_display = pygame,display.set_mode((width2, height2))
-# block_m = pygame.image.load('BlockM.bmp')
-# block_m = pygame.transform.scale(block_m, (width2, height2))
+ice_rink = pygame.transform.scale(ice_rink, (max_width, max_height))
+pygame.display.set_caption('AIR HOCKEY')
 
 
 
@@ -29,36 +22,31 @@ class Paddle(pygame.sprite.Sprite):
 		self.width = 50
 		self.height = 50
 
-		self.screen = pygame.display.set_caption('AIR HOCKEY') #will need to be moved
-
 		self.image = pygame.image.load('paddle.bmp')
 		self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
 		self.rect = self.image.get_rect()
-		self.rect.centerx = width/2
-		self.rect.bottom = height - 10
+		self.rect.centerx = max_width/2
+		self.rect.bottom = max_height - 10
 
 
 	def update(self):
 		keys = pygame.key.get_pressed()
-		self.speed = 0
 
-		#create response to key press
+		# move paddle based on key press
 		if keys[pygame.K_LEFT]:
-			self.speed -= 5
+			self.rect.x -= 5
 		if keys[pygame.K_RIGHT]:
-			self.speed += 5	
-		
-		#update position of the rectangle
-		self.rect.x += self.speed
+			self.rect.x += 5
 
-		#thresholds of movement (cant go past border)
-		if self.rect.right > width:
-			self.rect.right = width
+		# check boundary condition
+		if self.rect.right > max_width:
+			self.rect.right = max_width
 		if self.rect.left < 0:
-				self.rect.left = 0	
+			self.rect.left = 0
 
-	
+	#def detect_collision(self):
+		#code
 
 class Puck(pygame.sprite.Sprite):
 	def __init__(self):
@@ -68,39 +56,55 @@ class Puck(pygame.sprite.Sprite):
 		self.height = 30
 
 		self.image = pygame.image.load('puck.bmp')
-		self.image = transform.scale(self.image, (self.width, self.height))
+		self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
 		self.rect = self.image.get_rect()
-		self.rect.centerx = width/2
-		self.rect.bottom = height - 55
-		 
+		self.rect.center = (max_width/2, max_height - 55)
+		self.direction = [4,-4]
+		self.paddle_score = 0
+		self.net_score = 0
 
 	def update(self):
-		keys = pygame.key.get_pressed()
-		#self.speed = 0
+		# update Puck x and y directions
+		left, top = self.rect.center
+		left += self.direction[0]
+		top += self.direction[1]
+
+		# check boundary conditions
+		if left <= 0:
+			left = 0
+			self.direction[0] = -self.direction[0]
+		elif left >= max_width:
+			left = max_width
+			self.direction[0] = -self.direction[0]
+
+		if top <= 0:
+			top = 0
+			self.direction[1] = -self.direction[1]		
+
+		elif top >= max_height:
+			top = max_height
+			self.direction[1] = -self.direction[1]
+
+		self.rect.center = left, top
+	
+	def changedirection(self):
+		right, bottom = self.rect.center
+		if bottom >= max_height - 55:
+			self.direction[1] = self.direction[0]
+		left, bottom = self.rect.center
+			
+		self.rect.center = right, bottom
+
+	# def changedirection2(self):
+	# 	left, bottom = self.rect.center
+	# 	if bottom >= max_height - 55:
+	# 		self.speed[1] = self.speed[0]
+
+	# 	self.rect.center = left, bottom	
 		
-		if keys[pygame.K_SPACE]:
-			self.speed = 4
-			self.rect.left += self.speed
-			self.rect.top  += -self.speed
-
-		if self.rect.top < 0:
-			self.rect.top = 0
-			#self.speed = -4
-			#self.rect.top -= self.speed	
-
-		if self.rect.right > width:
-			self.rect.right = width
-			self.rect.right +
-		if self.rect.left < 0:
-			self.rect.left = 0	
-
-
-
-			#need a way to reverse position at an angle. Also make the ball move at random angle.
-
-	#Add code that makes the puck move when space bar is pressed
-	#will function like a brick breaker game
+		#self.paddle += 1
+		#self.net_score += 1
 
 class Net(pygame.sprite.Sprite):
 	def __init__(self):
@@ -110,29 +114,40 @@ class Net(pygame.sprite.Sprite):
 		self.height = 80
 
 		self.image = pygame.image.load('net.bmp')
-		self.image = transform.scale(self.image, (self.width, self.height)) 
+		self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
 		self.rect = self.image.get_rect()
-		self.rect.centerx = width/2
-		self.rect.top = height - 675
+		self.rect.centerx = max_width/2
+		self.rect.top = max_height - 675
 
-	#def update(self):	
-	#Add code that makes the net move back and forth and a constant rate
-	#if the puck collides with net, gain score of 1
-	#if the puck passes by the paddle, opponent gains a score of 1
+		self.speed = 5
 
+	def update(self):
+		# update Net position
+		self.rect.x += self.speed
+
+		# check boundary conditions
+		if self.rect.right > max_width:
+			self.rect.right = max_width
+			self.speed = -self.speed
+
+		elif self.rect.left < 0:
+			self.rect.left = 0
+			self.speed = -self.speed
+
+	#def detect_collision(self):
+		#code
 
 all_sprites = pygame.sprite.Group()
-#pucks = pygame.sprite.Group()
-#nets = pygame.sprite.Group()
 
 paddle = Paddle()
 puck = Puck()
 net = Net()
 
-all_sprites.add(paddle)
-all_sprites.add(puck)
-all_sprites.add(net)
+paddle.add(all_sprites)
+puck.add(all_sprites)
+net.add(all_sprites)
+
 
 gameExit = False
 while not gameExit:
@@ -141,11 +156,29 @@ while not gameExit:
 			gameExit = True
 	
 	game_display.blit(ice_rink, (0,0))
-	#m_display.blit(block_m, (0,0))
+	
 
 	all_sprites.update()
 	all_sprites.draw(game_display)
+
+	default_font = pygame.font.get_default_font()
+	font = pygame.font.Font(default_font, 50)
+	msg = font.render(str(puck.paddle_score)+"  Score  "+str(puck.net_score), True, (0,0,0))
+	game_display.blit(msg, (125,350))
+
+	if pygame.Rect.colliderect(paddle.rect, puck.rect):
+		puck.changedirection()
+
+	# if pygame.Rect.colliderect(paddle.rect, puck.rect):
+	# 	puck.changedirection2()
+			
+	if pygame.Rect.colliderect(puck.rect, net.rect):
+		puck.changedirection()
+		#update score	
 	
+
 	pygame.display.flip()
 pygame.quit()
 quit()
+
+
