@@ -1,9 +1,13 @@
 import pygame
 from pygame import *
 from pygame.sprite import *
+from pygame.mixer import *
 import random
 
 pygame.init()
+print("Author: Owen Gatto")
+#pygame.mixer.music.load()
+#pygame.mixer.music.play(loops =-1)
 
 max_width = 500
 max_height = 700
@@ -12,7 +16,6 @@ game_display = pygame.display.set_mode((max_width, max_height))
 ice_rink = pygame.image.load('ice.bmp')
 ice_rink = pygame.transform.scale(ice_rink, (max_width, max_height))
 pygame.display.set_caption('AIR HOCKEY')
-
 
 
 class Paddle(pygame.sprite.Sprite):
@@ -45,8 +48,6 @@ class Paddle(pygame.sprite.Sprite):
 		if self.rect.left < 0:
 			self.rect.left = 0
 
-	#def detect_collision(self):
-		#code
 
 class Puck(pygame.sprite.Sprite):
 	def __init__(self):
@@ -61,8 +62,7 @@ class Puck(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = (max_width/2, max_height - 55)
 		self.direction = [4,-4]
-		self.paddle_score = 0
-		self.net_score = 0
+
 
 	def update(self):
 		# update Puck x and y directions
@@ -84,16 +84,16 @@ class Puck(pygame.sprite.Sprite):
 
 		elif top >= max_height:
 			top = max_height
-			self.direction[1] = -self.direction[1]
+			self.direction[1] = -self.direction[1]	
 
 		self.rect.center = left, top
-	
+
 	def changedirection(self):
 		right, bottom = self.rect.center
 		if bottom >= max_height - 55:
 			self.direction[1] = self.direction[0]
 		left, bottom = self.rect.center
-			
+
 		self.rect.center = right, bottom
 
 	# def changedirection2(self):
@@ -103,7 +103,7 @@ class Puck(pygame.sprite.Sprite):
 
 	# 	self.rect.center = left, bottom	
 		
-		#self.paddle += 1
+		#self.paddle_score += 1
 		#self.net_score += 1
 
 class Net(pygame.sprite.Sprite):
@@ -121,6 +121,9 @@ class Net(pygame.sprite.Sprite):
 		self.rect.top = max_height - 675
 
 		self.speed = 5
+		self.score = 0
+		
+		self.state = 0
 
 	def update(self):
 		# update Net position
@@ -135,9 +138,12 @@ class Net(pygame.sprite.Sprite):
 			self.rect.left = 0
 			self.speed = -self.speed
 
-	#def detect_collision(self):
-		#code
-
+	def detect_score(self):
+		self.score += 1
+		if self.score >= 10:
+			self.score = 10
+			self.state = 1	
+			
 all_sprites = pygame.sprite.Group()
 
 paddle = Paddle()
@@ -155,26 +161,39 @@ while not gameExit:
 		if event.type == pygame.QUIT:
 			gameExit = True
 	
+	#put rink in background
 	game_display.blit(ice_rink, (0,0))
 	
-
+	#update all sprites and draw on screen
 	all_sprites.update()
 	all_sprites.draw(game_display)
 
-	default_font = pygame.font.get_default_font()
-	font = pygame.font.Font(default_font, 50)
-	msg = font.render(str(puck.paddle_score)+"  Score  "+str(puck.net_score), True, (0,0,0))
-	game_display.blit(msg, (125,350))
+	#display score
+	if net.state == 0:
+		default_font = pygame.font.get_default_font()
+		font = pygame.font.Font(default_font, 50)
+		msg = font.render("Score  "+str(net.score), True, (0,0,0))
+		game_display.blit(msg, (125,350))
 
+	#display message
+	if net.state == 1:
+		default_font = pygame.font.get_default_font()
+		font = pygame.font.Font(default_font, 50)
+		msg = font.render("Congratulations!", True, (0,0,0))
+		msg_2 = font.render("You Won!", True, (0,0,0))
+		game_display.blit(msg, (45,350))
+		game_display.blit(msg_2, (125,500))		
+
+
+	#if paddle and puck collide, change direction
 	if pygame.Rect.colliderect(paddle.rect, puck.rect):
 		puck.changedirection()
 
-	# if pygame.Rect.colliderect(paddle.rect, puck.rect):
-	# 	puck.changedirection2()
-			
+		
+	#if puck and net collide, detect the score.		
 	if pygame.Rect.colliderect(puck.rect, net.rect):
-		puck.changedirection()
-		#update score	
+		net.detect_score()
+			
 	
 
 	pygame.display.flip()
