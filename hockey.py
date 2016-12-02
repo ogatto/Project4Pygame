@@ -6,8 +6,8 @@ import random
 
 pygame.init()
 print("Author: Owen Gatto")
-#pygame.mixer.music.load()
-#pygame.mixer.music.play(loops =-1)
+pygame.mixer.music.load('nhl_organ.wav')
+pygame.mixer.music.play(loops =-1)
 
 max_width = 500
 max_height = 700
@@ -64,6 +64,7 @@ class Puck(pygame.sprite.Sprite):
 		self.direction = [4,-4]
 
 
+
 	def update(self):
 		# update Puck x and y directions
 		left, top = self.rect.center
@@ -78,8 +79,8 @@ class Puck(pygame.sprite.Sprite):
 			left = max_width
 			self.direction[0] = -self.direction[0]
 
-		if top <= 0:
-			top = 0
+		if top <= max_height-620:
+			top = max_height-620
 			self.direction[1] = -self.direction[1]		
 
 		elif top >= max_height:
@@ -89,22 +90,10 @@ class Puck(pygame.sprite.Sprite):
 		self.rect.center = left, top
 
 	def changedirection(self):
-		right, bottom = self.rect.center
+		bottom = self.rect.center[1]
 		if bottom >= max_height - 55:
-			self.direction[1] = self.direction[0]
-		left, bottom = self.rect.center
+			self.direction[1] = -self.direction[1]
 
-		self.rect.center = right, bottom
-
-	# def changedirection2(self):
-	# 	left, bottom = self.rect.center
-	# 	if bottom >= max_height - 55:
-	# 		self.speed[1] = self.speed[0]
-
-	# 	self.rect.center = left, bottom	
-		
-		#self.paddle_score += 1
-		#self.net_score += 1
 
 class Net(pygame.sprite.Sprite):
 	def __init__(self):
@@ -125,6 +114,8 @@ class Net(pygame.sprite.Sprite):
 		
 		self.state = 0
 
+		self.collidedetect = False
+
 	def update(self):
 		# update Net position
 		self.rect.x += self.speed
@@ -140,8 +131,8 @@ class Net(pygame.sprite.Sprite):
 
 	def detect_score(self):
 		self.score += 1
-		if self.score >= 10:
-			self.score = 10
+		if self.score >= 50:
+			self.score = 50
 			self.state = 1	
 			
 all_sprites = pygame.sprite.Group()
@@ -153,6 +144,7 @@ net = Net()
 paddle.add(all_sprites)
 puck.add(all_sprites)
 net.add(all_sprites)
+
 
 
 gameExit = False
@@ -181,8 +173,11 @@ while not gameExit:
 		font = pygame.font.Font(default_font, 50)
 		msg = font.render("Congratulations!", True, (0,0,0))
 		msg_2 = font.render("You Won!", True, (0,0,0))
-		game_display.blit(msg, (45,350))
-		game_display.blit(msg_2, (125,500))		
+		msg_3 = font.render("Score  "+str(net.score), True, (0,0,0))
+		game_display.blit(msg_3, (125,350))
+		game_display.blit(msg, (45, 200))
+		game_display.blit(msg_2, (125,500))
+
 
 
 	#if paddle and puck collide, change direction
@@ -191,8 +186,12 @@ while not gameExit:
 
 		
 	#if puck and net collide, detect the score.		
-	if pygame.Rect.colliderect(puck.rect, net.rect):
+	if pygame.Rect.colliderect(puck.rect, net.rect) and net.collidedetect == False:
 		net.detect_score()
+		net.collidedetect = True
+
+	if puck.rect.center[1] >= 100:
+		net.collidedetect = False
 			
 	
 
